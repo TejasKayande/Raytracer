@@ -32,3 +32,6 @@ Desktop.ini
 *.obj
 *.o
 *.pdb
+
+build.bat
+run.bat
