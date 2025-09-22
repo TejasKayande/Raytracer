@@ -1,0 +1,46 @@
+
+cmake_minimum_required(VERSION 3.10)
+project(Raytracer)
+cmake_policy(SET CMP0074 NEW)
+
+set(CMAKE_CXX_STANDARD 20)
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "/EHsc /MP /Zi /Wall")
+    set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MP /DNDEBUG /GL")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wpedantic")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
+set(DEPS_DIR ${CMAKE_SOURCE_DIR}/dependencies)
+
+find_package(OpenGL REQUIRED)
+
+# GLFW
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(${DEPS_DIR}/glfw)
+
+#GLEW
+set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+add_subdirectory(${DEPS_DIR}/glew/)
+
+add_executable(Raytracer source/main.cpp)
+
+target_link_libraries(Raytracer PRIVATE OpenGL::GL glfw)
+target_include_directories(Raytracer PRIVATE 
+    ${DEPS_DIR}/glfw/include
+    ${DEPS_DIR}/glew/include
+    ${DEPS_DIR}/glm
+)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Raytracer)
