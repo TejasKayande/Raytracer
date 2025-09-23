@@ -2,7 +2,9 @@
 #pragma once
 #include "base.hpp"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <string>
 
 class Window {
@@ -25,7 +27,7 @@ class Window {
 
     void setTitle(const std::string& title);
 
-    void getSize(int &width, int &height) const;
+    void getSize(int& width, int& height) const;
     void setSize(const int width, const int height);
 
     void getCursorPosition(double& x, double& y) const;

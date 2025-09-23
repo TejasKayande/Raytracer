@@ -12,6 +12,7 @@ endif()
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "/EHsc /MP /Zi /W3")
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MP /DNDEBUG /GL")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -W2 -Wextra -Wpedantic")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -36,10 +37,18 @@ add_subdirectory(${DEPS_DIR}/glew/)
 
 add_executable(Raytracer
   source/main.cpp
-  source/Window.cpp
+  source/window.cpp
+  source/shader.cpp
 )
 
-target_link_libraries(Raytracer PRIVATE OpenGL::GL glfw)
+target_compile_definitions(Raytracer PRIVATE GLEW_STATIC)
+
+target_link_libraries(Raytracer PRIVATE
+  OpenGL::GL
+  glfw
+  libglew_static
+)
+
 target_include_directories(Raytracer PRIVATE 
     ${DEPS_DIR}/glfw/include
     ${DEPS_DIR}/glew/include

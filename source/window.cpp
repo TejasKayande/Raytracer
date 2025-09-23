@@ -1,6 +1,10 @@
 
 #include "window.hpp"
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include <string>
 #include <iostream>
 
 Window::Window(const int width, const int height, const std::string& title) {
@@ -22,6 +26,17 @@ Window::Window(const int width, const int height, const std::string& title) {
     }
 
     glfwMakeContextCurrent(m_window);
+
+    glfwSwapInterval(0);
+
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW: "
+                  << glewGetErrorString(err) << "\n";
+        glfwDestroyWindow(m_window);
+        glfwTerminate();
+        std::exit(EXIT_FAILURE);
+    }
 }
 
 Window::~Window() {
