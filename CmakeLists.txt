@@ -10,10 +10,10 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG "/EHsc /MP /Zi /Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "/EHsc /MP /Zi /W3")
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MP /DNDEBUG /GL")
 else()
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wpedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -W2 -Wextra -Wpedantic")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
@@ -34,7 +34,10 @@ set(BUILD_UTILS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 add_subdirectory(${DEPS_DIR}/glew/)
 
-add_executable(Raytracer source/main.cpp)
+add_executable(Raytracer
+  source/main.cpp
+  source/Window.cpp
+)
 
 target_link_libraries(Raytracer PRIVATE OpenGL::GL glfw)
 target_include_directories(Raytracer PRIVATE 
