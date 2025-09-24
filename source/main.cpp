@@ -39,6 +39,10 @@ int main() {
 
         wnd->clear(0xFF00FFFF);
 
+        int w = wnd->getWidth();
+        int h = wnd->getHeight();
+        glViewport(0, 0, w, h);
+
         double mouseX, mouseY;
         wnd->getCursorPosition(mouseX, mouseY);
         shader.setUniform("uMouse", glm::vec2(float(mouseX), float(mouseY)));
@@ -46,6 +50,7 @@ int main() {
         shader.setUniform("uResolution", glm::vec2(1000.0f, 800.0f));
 
         shader.bind();
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

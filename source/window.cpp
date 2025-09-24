@@ -83,11 +83,26 @@ void Window::setTitle(const std::string& title) {
     }
 }
 
-void Window::getSize(int &width, int &height) const {
+int Window::getWidth() const {
 
     if (m_window) {
-        glfwGetWindowSize(m_window, &width, &height);
+        int width;
+        glfwGetWindowSize(m_window, &width, NULL);
+        return width;
     }
+
+    return 0;
+}
+
+int Window::getHeight() const {
+
+    if (m_window) {
+        int height;
+        glfwGetWindowSize(m_window, NULL, &height);
+        return height;
+    }
+
+    return 0;
 }
 
 void Window::setSize(const int width, const int height) {

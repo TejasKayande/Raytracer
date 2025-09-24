@@ -27,7 +27,8 @@ class Window {
 
     void setTitle(const std::string& title);
 
-    void getSize(int& width, int& height) const;
+    int getWidth() const;
+    int getHeight() const;
     void setSize(const int width, const int height);
 
     void getCursorPosition(double& x, double& y) const;
