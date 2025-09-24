@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 project(Raytracer)
 cmake_policy(SET CMP0074 NEW)
 
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(CMAKE_CXX_STANDARD 20)
+
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -12,6 +14,10 @@ endif()
 if(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "/EHsc /MP /Zi /W3")
     set(CMAKE_CXX_FLAGS_RELEASE "/Ox /MP /DNDEBUG /GL")
+
+    set(CMAKE_C_FLAGS_DEBUG "/MTd")
+    set(CMAKE_C_FLAGS_RELEASE "/MT")
+
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -W2 -Wextra -Wpedantic")

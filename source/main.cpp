@@ -58,4 +58,3 @@ int main() {
     delete wnd;
     return 0;
 }
-
