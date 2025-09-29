@@ -11,7 +11,7 @@ int main() {
 
     Texture outputTex(wnd->getWidth(), wnd->getHeight());
 
-    Shader computeShader("../assets/shaders/basic_compute.glsl");
+    Shader computeShader("../assets/shaders/raytracer_compute.glsl");
     Shader quadShader("../assets/shaders/basic_vert.glsl", "../assets/shaders/basic_frag.glsl");
 
     float quadVertices[] = {
@@ -49,19 +49,15 @@ int main() {
 
     while (!wnd->shouldClose()) {
 
-        float time = (float)glfwGetTime();
-
         int w = wnd->getWidth();
         int h = wnd->getHeight();
-        glViewport(0, 0, w, h);
+        // glViewport(0, 0, w, h);
 
         double mouseX, mouseY;
         wnd->getCursorPosition(mouseX, mouseY);
 
         computeShader.bind();
-        computeShader.setUniform("time", time);
         computeShader.setUniform("resolution", glm::ivec2(w, h));
-        computeShader.setUniform("mouse", glm::ivec2(mouseX, mouseY));
 
         glBindImageTexture(0, outputTex.getID(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
@@ -75,13 +71,16 @@ int main() {
 
         quadShader.setUniform("screenTex", 0);
 
+        { // Render
 
-        wnd->clear(0xFF00FFFF);
+            wnd->clear(0xFF00FFFF);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        wnd->swapBuffers();
+            wnd->swapBuffers();
+        }
+
         wnd->pollEvents();
     }
 
