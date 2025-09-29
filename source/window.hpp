@@ -6,8 +6,10 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
+#include <unordered_map>
 
 class Window {
+
  public:
 
     Window(const int width, const int height, const std::string& title);
@@ -33,7 +35,13 @@ class Window {
 
     void getCursorPosition(double& x, double& y) const;
 
+    bool isKeyPressed(int key) const;
+    bool isMouseButtonPressed(int button) const;
+
+    void toggleCursorVisibility(bool val);
+
  private:
 
     GLFWwindow* m_window = nullptr;
+    bool m_cursorVisibility = false;
 };

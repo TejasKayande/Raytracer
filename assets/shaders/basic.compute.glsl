@@ -13,13 +13,10 @@ void main() {
     
     if (pixel.x >= resolution.x || pixel.y >= resolution.y) return;
     
-    // Normalize pixel coordinates
     vec2 uv = vec2(pixel) / vec2(resolution);
     
-    // Compute distance from moving point (mouse)
     float d = distance(uv, mouse);
     
-    // Animated color
     vec3 color = vec3(0.5 + 0.5 * sin(time + uv.x * 10.0),
                       0.5 + 0.5 * cos(time + uv.y * 10.0),
                       1.0 - smoothstep(0.0, 0.2, d));

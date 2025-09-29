@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 
+
 Window::Window(const int width, const int height, const std::string& title) {
 
     if (!glfwInit()) {
@@ -27,7 +28,7 @@ Window::Window(const int width, const int height, const std::string& title) {
 
     glfwMakeContextCurrent(m_window);
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     GLenum err = glewInit();
     if (err != GLEW_OK) {
@@ -119,4 +120,27 @@ void Window::getCursorPosition(double& x, double& y) const {
     } else {
         x = y = 0.0;
     }
+}
+
+bool Window::isKeyPressed(int key) const {
+ 
+    if (!m_window) return false;
+    return glfwGetKey(m_window, key) == GLFW_PRESS;   
+}
+
+bool Window::isMouseButtonPressed(int button) const {
+ 
+    if (!m_window) return false;
+    return glfwGetMouseButton(m_window, button) == GLFW_PRESS;   
+}
+
+void Window::toggleCursorVisibility(bool val) {
+
+    m_cursorVisibility = val;
+
+    if (m_cursorVisibility)
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else
+        glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 }
