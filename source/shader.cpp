@@ -107,6 +107,16 @@ void Shader::setUniform(const std::string& name, GLfloat value) const {
     }
 }
 
+void Shader::setUniform(const std::string& name, const glm::ivec2& value) const {
+
+    GLint loc = glGetUniformLocation(m_programID, name.c_str());
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found in shader.\n";
+    } else {
+        glUniform2i(loc, value.x, value.y);
+    } 
+}
+
 void Shader::setUniform(const std::string& name, const glm::vec2& value) const {
 
     GLint loc = glGetUniformLocation(m_programID, name.c_str());
@@ -117,6 +127,16 @@ void Shader::setUniform(const std::string& name, const glm::vec2& value) const {
     }
 }
 
+void Shader::setUniform(const std::string& name, const glm::ivec3& value) const {
+
+    GLint loc = glGetUniformLocation(m_programID, name.c_str());
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found in shader.\n";
+    } else {
+        glUniform3i(loc, value.x, value.y, value.z);
+    }
+}
+
 void Shader::setUniform(const std::string& name, const glm::vec3& value) const {
 
     GLint loc = glGetUniformLocation(m_programID, name.c_str());
@@ -124,6 +144,16 @@ void Shader::setUniform(const std::string& name, const glm::vec3& value) const {
         std::cerr << "Uniform '" << name << "' not found in shader.\n";
     } else {
         glUniform3fv(loc, 1, &value[0]);
+    }
+}
+
+void Shader::setUniform(const std::string& name, const glm::ivec4& value) const {
+
+    GLint loc = glGetUniformLocation(m_programID, name.c_str());
+    if (loc == -1) {
+        std::cerr << "Uniform '" << name << "' not found in shader.\n";
+    } else {
+        glUniform4i(loc, value.x, value.y, value.z, value.w);
     }
 }
 
