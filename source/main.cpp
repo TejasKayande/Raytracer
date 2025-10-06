@@ -5,53 +5,22 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
+#include "renderer.hpp"
+
 int main(void) {
 
-    Window *wnd = new Window(1600, 1600, "test");
+    Window   *wnd = new Window(1600, 1600, "test");
+    Renderer *rnd = new Renderer();
 
     Texture outputTex(wnd->getWidth(), wnd->getHeight());
 
     // NOTE(Tejas): There are different uniforms for different shaders here...
     // Shader computeShader("../assets/shaders/basic.compute.glsl");
     // Shader computeShader("../assets/shaders/raytracer.compute.glsl");
-    Shader computeShader("../assets/shaders/cam.compute.glsl");
+    // Shader computeShader("../assets/shaders/cam.compute.glsl");
+    Shader computeShader("../assets/shaders/raytri.compute.glsl");
     Shader quadShader("../assets/shaders/basic.vert.glsl", "../assets/shaders/basic.frag.glsl");
 
-    float quadVertices[] = {
-        // pos           // tex
-        -1.0f, -1.0f,    0.0f, 0.0f,
-         1.0f, -1.0f,    1.0f, 0.0f,
-         1.0f,  1.0f,    1.0f, 1.0f,
-        -1.0f,  1.0f,    0.0f, 1.0f
-    };
-    
-    unsigned int quadIndices[] = { 0,1,2,  2,3,0 };
-    
-    GLuint VAO, VBO, EBO;
-
-    {
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-        
-        glBindVertexArray(VAO);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
-        
-        // position
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // texture
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-        
-        glBindVertexArray(0);
-    }
 
     glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 5.0f);
     glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -70,6 +39,10 @@ int main(void) {
     float last = 0.0f;
 
     while (!wnd->shouldClose()) {
+
+        int w = wnd->getWidth();
+        int h = wnd->getHeight();
+        // glViewport(0, 0, w, h);
 
         float current = (float)glfwGetTime();
         delta = current - last;
@@ -92,14 +65,10 @@ int main(void) {
             }
         }
 
-        int w = wnd->getWidth();
-        int h = wnd->getHeight();
-        // glViewport(0, 0, w, h);
-
         double mouseX, mouseY;
         wnd->getCursorPosition(mouseX, mouseY);
 
-        { // Camera Stuff
+        { // Camera and Movement Stuff
             
             float xoffset = (float)(mouseX - lastX);
             float yoffset = (float)(lastY - mouseY);
@@ -137,40 +106,31 @@ int main(void) {
             if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) camPos -= camUp * speed * delta;
         }
 
+        { // compute shader
 
-        computeShader.bind();
-        computeShader.setUniform("resolution", glm::ivec2(w, h));
-        computeShader.setUniform("camPos", camPos);
-        computeShader.setUniform("camFront", camFront);
-        computeShader.setUniform("camUp", camUp);
+            computeShader.bind();
+            computeShader.setUniform("resolution", glm::ivec2(w, h));
+            computeShader.setUniform("camPos", camPos);
+            computeShader.setUniform("camFront", camFront);
+            computeShader.setUniform("camUp", camUp);
         
 
-        // Work Groups
-        glDispatchCompute((GLuint)((w + 15) / 16), (GLuint)((h + 15) / 16), 1);
-
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        
-        quadShader.bind();
-        outputTex.bind();
-
-        quadShader.setUniform("screenTex", 0);
+            // Work Groups
+            glDispatchCompute((GLuint)((w + 15) / 16), (GLuint)((h + 15) / 16), 1);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
 
         { // Render
 
             wnd->clear(0xFF00FFFF);
-
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+            rnd->draw(quadShader, outputTex);
             wnd->swapBuffers();
         }
 
         wnd->pollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
+    delete rnd;
     delete wnd;
     return 0;
 }

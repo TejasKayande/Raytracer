@@ -18,7 +18,7 @@ if(MSVC)
     set(CMAKE_C_FLAGS_DEBUG "/MTd")
     set(CMAKE_C_FLAGS_RELEASE "/MT")
 
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -W2 -Wextra -Wpedantic")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
@@ -46,6 +46,7 @@ add_executable(Raytracer
   source/window.cpp
   source/shader.cpp
   source/texture.cpp
+  source/renderer.cpp
 )
 
 target_compile_definitions(Raytracer PRIVATE GLEW_STATIC)

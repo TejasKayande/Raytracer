@@ -7,7 +7,6 @@
 #include <string>
 #include <iostream>
 
-
 Window::Window(const int width, const int height, const std::string& title) {
 
     if (!glfwInit()) {
