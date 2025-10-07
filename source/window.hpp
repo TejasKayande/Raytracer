@@ -33,6 +33,8 @@ class Window {
     int getHeight() const;
     void setSize(const int width, const int height);
 
+    double getTime() const;
+
     void getCursorPosition(double& x, double& y) const;
 
     bool isKeyPressed(int key) const;

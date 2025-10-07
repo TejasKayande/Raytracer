@@ -16,14 +16,14 @@ public:
     Texture(int width, int height);
     ~Texture();
 
-    Texture(const Texture&) = delete;
+    Texture(const Texture&)            = delete;
     Texture& operator=(const Texture&) = delete;
 
     Texture(Texture&& other);
     Texture& operator=(Texture&& other);
 
-    void bind() const;
-    void unbind() const;
+    void bind(int unit=0) const;
+    void unbind(int unit=0) const;
 
     GLuint getID() const;
     int getWidth() const;

@@ -112,13 +112,16 @@ void Window::setSize(const int width, const int height) {
     }
 }
 
+double Window::getTime() const {
+
+    if (m_window) return glfwGetTime();
+    return -1.0;
+}
+
 void Window::getCursorPosition(double& x, double& y) const {
 
-    if (m_window) {
-        glfwGetCursorPos(m_window, &x, &y);
-    } else {
-        x = y = 0.0;
-    }
+    if (m_window) glfwGetCursorPos(m_window, &x, &y);
+    else x = y = 0.0;
 }
 
 bool Window::isKeyPressed(int key) const {

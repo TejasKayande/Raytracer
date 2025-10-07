@@ -7,36 +7,84 @@
 
 #include "renderer.hpp"
 
+#include <cstdlib>
+#include <ctime>
+
+// TODO(Tejas): Do I want to store them in std::vector?? I dont know...
+//              Maybe create a world or scene abstraction!
+global std::vector<Sphere> G_spheres;
+
+internal float randRange(float min, float max) {
+
+    return min + static_cast<float>(std::rand()) / RAND_MAX * (max - min);
+}
+
+internal bool tooClose(const Sphere& a, const Sphere& b, float minDistance) {
+
+    float distSq = glm::dot(a.center - b.center, a.center - b.center);
+    return distSq < (minDistance * minDistance);
+}
+
+internal void createSpheres() {
+    
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+    G_spheres.reserve(20);
+
+    const float worldMin = -100.0f;
+    const float worldMax =  100.0f;
+    const float minSpacing = 8.0f;  // keep spheres at least 8 units apart
+
+    for (int i = 0; i < 500; ++i) {
+
+        Sphere s;
+        bool placed = false;
+
+        s.radius = randRange(1.0f, 7.0f);
+        s.color  = glm::vec3(randRange(0.0f, 1.0f),
+                             randRange(0.0f, 1.0f),
+                             randRange(0.0f, 1.0f));
+        s._padding = 0.0f;
+
+        while (!placed) {
+
+            s.center = glm::vec3(randRange(worldMin, worldMax),
+                                 randRange(worldMin, worldMax),
+                                 randRange(worldMin, worldMax));
+            placed = true;
+            for (const auto& other : G_spheres) {
+                if (tooClose(s, other, minSpacing)) {
+                    placed = false;
+                    break;
+                }
+            }
+        }
+
+        G_spheres.push_back(s);
+    }
+}
+
 int main(void) {
 
     Window   *wnd = new Window(1600, 1600, "test");
-    Renderer *rnd = new Renderer();
+    Renderer *rnd = new Renderer(wnd->getWidth(), wnd->getHeight());
 
-    Texture outputTex(wnd->getWidth(), wnd->getHeight());
-
-    // NOTE(Tejas): There are different uniforms for different shaders here...
-    // Shader computeShader("../assets/shaders/basic.compute.glsl");
-    // Shader computeShader("../assets/shaders/raytracer.compute.glsl");
-    // Shader computeShader("../assets/shaders/cam.compute.glsl");
-    Shader computeShader("../assets/shaders/raytri.compute.glsl");
-    Shader quadShader("../assets/shaders/basic.vert.glsl", "../assets/shaders/basic.frag.glsl");
-
-
-    glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 5.0f);
-    glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 camUp    = glm::vec3(0.0f, 1.0f, 0.0f);
+    createSpheres();
 
     // TODO(Tejas): Abstract this away...
+    glm::vec3 cam_pos   = glm::vec3(0.0f, 0.0f, 5.0f);
+    glm::vec3 cam_front = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cam_up    = glm::vec3(0.0f, 1.0f, 0.0f);
+
     float yaw         = -90.0f;
     float pitch       = 0.0f;
-    float speed       = 5.0f;
+    float speed       = 8.0f;
     float sensitivity = 0.1f;
 
-    double lastX = wnd->getWidth()  * 0.5;
-    double lastY = wnd->getHeight() * 0.5;
+    double last_x = wnd->getWidth()  * 0.5;
+    double last_y = wnd->getHeight() * 0.5;
 
     float delta = 0.0f;
-    float last = 0.0f;
+    float last  = 0.0f;
 
     while (!wnd->shouldClose()) {
 
@@ -44,36 +92,35 @@ int main(void) {
         int h = wnd->getHeight();
         // glViewport(0, 0, w, h);
 
-        float current = (float)glfwGetTime();
+        float current = (float)wnd->getTime();
         delta = current - last;
         last  = current;
 
         { // Counting FPS
-
-            persist float accumulator = 0.0f;
-            persist int   frameCount  = 0;
+            persist float accum       = 0.0f;
+            persist int   frame_count = 0;
             persist float FPS         = 0.0f;
         
-            accumulator += delta;
-            frameCount++;
+            accum += delta;
+            frame_count++;
         
-            if (accumulator >= 1.0f) {
-                FPS = frameCount / accumulator;
+            if (accum >= 1.0f) {
+                FPS = frame_count / accum;
                 wnd->setTitle("FPS: " + std::to_string(FPS));
-                accumulator = 0.0f;
-                frameCount = 0;
+                accum = 0.0f;
+                frame_count = 0;
             }
         }
 
-        double mouseX, mouseY;
-        wnd->getCursorPosition(mouseX, mouseY);
+        double mouse_x, mouse_y;
+        wnd->getCursorPosition(mouse_x, mouse_y);
 
-        { // Camera and Movement Stuff
+        { // NOTE(Tejas): Movement Stuff needs to be checked somewhere else.
             
-            float xoffset = (float)(mouseX - lastX);
-            float yoffset = (float)(lastY - mouseY);
-            lastX = mouseX;
-            lastY = mouseY;
+            float xoffset = (float)(mouse_x - last_x);
+            float yoffset = (float)(last_y - mouse_y);
+            last_x = mouse_x;
+            last_y = mouse_y;
 
             xoffset *= sensitivity;
             yoffset *= sensitivity;
@@ -87,10 +134,10 @@ int main(void) {
                 if(pitch > 80.0f) pitch = 80.0f;
                 if(pitch < -80.0f) pitch = -80.0f;
 
-                camFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-                camFront.y = sin(glm::radians(pitch));
-                camFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-                camFront = glm::normalize(camFront);
+                cam_front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+                cam_front.y = sin(glm::radians(pitch));
+                cam_front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+                cam_front = glm::normalize(cam_front);
 
             } else {
 
@@ -98,39 +145,27 @@ int main(void) {
                 
             }
 
-            if (wnd->isKeyPressed(GLFW_KEY_W))          camPos += camFront * speed * delta;   
-            if (wnd->isKeyPressed(GLFW_KEY_S))          camPos -= camFront * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_A))          camPos -= glm::normalize(glm::cross(camFront, camUp)) * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_D))          camPos += glm::normalize(glm::cross(camFront, camUp)) * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_SPACE))      camPos += camUp * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) camPos -= camUp * speed * delta;
+            if (wnd->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) speed = 15.0f;
+            else speed = 8.0f;
+
+            if (wnd->isKeyPressed(GLFW_KEY_W))          cam_pos += cam_front * speed * delta;   
+            if (wnd->isKeyPressed(GLFW_KEY_S))          cam_pos -= cam_front * speed * delta;
+            if (wnd->isKeyPressed(GLFW_KEY_A))          cam_pos -= glm::normalize(glm::cross(cam_front, cam_up)) * speed * delta;
+            if (wnd->isKeyPressed(GLFW_KEY_D))          cam_pos += glm::normalize(glm::cross(cam_front, cam_up)) * speed * delta;
+            if (wnd->isKeyPressed(GLFW_KEY_SPACE))      cam_pos += cam_up * speed * delta;
+            if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) cam_pos -= cam_up * speed * delta;
         }
 
-        { // compute shader
-
-            computeShader.bind();
-            computeShader.setUniform("resolution", glm::ivec2(w, h));
-            computeShader.setUniform("camPos", camPos);
-            computeShader.setUniform("camFront", camFront);
-            computeShader.setUniform("camUp", camUp);
-        
-
-            // Work Groups
-            glDispatchCompute((GLuint)((w + 15) / 16), (GLuint)((h + 15) / 16), 1);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-        }
-
-        { // Render
-
-            wnd->clear(0xFF00FFFF);
-            rnd->draw(quadShader, outputTex);
-            wnd->swapBuffers();
-        }
+        wnd->clear(0x000000FF);
+        rnd->updateSSBO(G_spheres);
+        rnd->draw(w, h, cam_pos, cam_front, cam_up);
+        wnd->swapBuffers();
 
         wnd->pollEvents();
     }
 
     delete rnd;
     delete wnd;
+
     return 0;
 }

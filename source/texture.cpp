@@ -58,16 +58,16 @@ Texture& Texture::operator=(Texture&& other) {
     return *this;
 }
 
-void Texture::bind() const {
+void Texture::bind(int unit) const {
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, m_textureID);
     glBindImageTexture(0, m_textureID, 0, m_type, 0, GL_WRITE_ONLY, m_internalFormat);
 }
 
-void Texture::unbind() const {
+void Texture::unbind(int unit) const {
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0 + unit);
 }
 
 GLuint Texture::getID() const {

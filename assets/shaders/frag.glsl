@@ -9,4 +9,3 @@ void main() {
 
     FragColor = texture(screenTex, vTexCoord);
 }
-
