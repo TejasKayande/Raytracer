@@ -19,10 +19,10 @@ internal float randRange(float min, float max) {
     return min + static_cast<float>(std::rand()) / RAND_MAX * (max - min);
 }
 
-internal bool tooClose(const Sphere& a, const Sphere& b, float minDistance) {
+internal bool tooClose(const Sphere& a, const Sphere& b, float min_distance) {
 
     float distSq = glm::dot(a.center - b.center, a.center - b.center);
-    return distSq < (minDistance * minDistance);
+    return distSq < (min_distance * min_distance);
 }
 
 internal void createSpheres() {
@@ -30,16 +30,16 @@ internal void createSpheres() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     G_spheres.reserve(20);
 
-    const float worldMin = -100.0f;
-    const float worldMax =  100.0f;
-    const float minSpacing = 8.0f;  // keep spheres at least 8 units apart
+    const float world_min = -100.0f;
+    const float world_max =  100.0f;
+    const float min_spacing = 8.0f;
 
-    for (int i = 0; i < 500; ++i) {
+    for (int i = 0; i < 600; ++i) {
 
         Sphere s;
         bool placed = false;
 
-        s.radius = randRange(1.0f, 7.0f);
+        s.radius = randRange(3.0f, 5.0f);
         s.color  = glm::vec3(randRange(0.0f, 1.0f),
                              randRange(0.0f, 1.0f),
                              randRange(0.0f, 1.0f));
@@ -47,12 +47,12 @@ internal void createSpheres() {
 
         while (!placed) {
 
-            s.center = glm::vec3(randRange(worldMin, worldMax),
-                                 randRange(worldMin, worldMax),
-                                 randRange(worldMin, worldMax));
+            s.center = glm::vec3(randRange(world_min, world_max),
+                                 randRange(world_min, world_max),
+                                 randRange(world_min, world_max));
             placed = true;
             for (const auto& other : G_spheres) {
-                if (tooClose(s, other, minSpacing)) {
+                if (tooClose(s, other, min_spacing)) {
                     placed = false;
                     break;
                 }
