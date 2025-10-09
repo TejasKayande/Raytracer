@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.hpp"
+#include "camera.hpp"
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -32,8 +33,13 @@ public:
     std::vector<Sphere> getSpheres() const;
     glm::vec3 getLightDirection() const;
 
+public:
+    
+    Camera camera;
+
 private:
 
     std::vector<Sphere> m_spheres;
     glm::vec3 m_lightDirection;
+
 };

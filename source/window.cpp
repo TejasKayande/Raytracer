@@ -146,3 +146,8 @@ void Window::toggleCursorVisibility(bool val) {
         glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 }
+
+bool Window::isCursorVisible() const {
+
+    return m_cursorVisibility;
+}

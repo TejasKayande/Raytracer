@@ -41,6 +41,7 @@ class Window {
     bool isMouseButtonPressed(int button) const;
 
     void toggleCursorVisibility(bool val);
+    bool isCursorVisible() const;
 
  private:
 

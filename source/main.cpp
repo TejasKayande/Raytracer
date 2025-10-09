@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 
-World wrld;
+World G_world;
 
 internal float randRange(float min, float max) {
 
@@ -48,7 +48,7 @@ internal void createSpheres() {
                                  randRange(world_min, world_max),
                                  randRange(world_min, world_max));
             placed = true;
-            for (const auto& other : wrld.getSpheres()) {
+            for (const auto& other : G_world.getSpheres()) {
                 if (tooClose(s, other, min_spacing)) {
                     placed = false;
                     break;
@@ -56,11 +56,11 @@ internal void createSpheres() {
             }
 
             if (placed) {
-                wrld.addSphere(s.center, s.radius, s.color);
+                G_world.addSphere(s.center, s.radius, s.color);
             }
         }
 
-        // wrld.addSphere(s);
+        // G_world.addSphere(s);
     }
 }
 
@@ -70,20 +70,7 @@ int main(void) {
     Renderer *rnd = new Renderer(wnd->getWidth(), wnd->getHeight());
 
     createSpheres();
-    wrld.updateLightDirection(glm::vec3(0.0f, 1.0f, 1.0f));
-
-    // TODO(Tejas): Abstract this away...
-    glm::vec3 cam_pos   = glm::vec3(0.0f, 0.0f, 5.0f);
-    glm::vec3 cam_front = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cam_up    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    float yaw         = -90.0f;
-    float pitch       = 0.0f;
-    float speed       = 8.0f;
-    float sensitivity = 0.1f;
-
-    double last_x = wnd->getWidth()  * 0.5;
-    double last_y = wnd->getHeight() * 0.5;
+    G_world.updateLightDirection(glm::vec3(0.0f, 1.0f, 1.0f));
 
     float delta = 0.0f;
     float last  = 0.0f;
@@ -98,7 +85,7 @@ int main(void) {
         delta = current - last;
         last  = current;
 
-        { // Counting FPS
+        {
             persist float accum       = 0.0f;
             persist int   frame_count = 0;
             persist float FPS         = 0.0f;
@@ -116,51 +103,26 @@ int main(void) {
 
         double mouse_x, mouse_y;
         wnd->getCursorPosition(mouse_x, mouse_y);
+        if (wnd->isMouseButtonPressed(0)) wnd->toggleCursorVisibility(false);
+        else                              wnd->toggleCursorVisibility(true);
 
-        { // NOTE(Tejas): Movement Stuff needs to be checked somewhere else.
-            
-            float xoffset = (float)(mouse_x - last_x);
-            float yoffset = (float)(last_y - mouse_y);
-            last_x = mouse_x;
-            last_y = mouse_y;
+        G_world.camera.updateMouse(mouse_x, mouse_y, !wnd->isCursorVisible());
 
-            xoffset *= sensitivity;
-            yoffset *= sensitivity;
-
-            if (wnd->isMouseButtonPressed(0)) {
-
-                wnd->toggleCursorVisibility(false);
-                
-                yaw   += xoffset;
-                pitch += yoffset;
-                if(pitch > 80.0f) pitch = 80.0f;
-                if(pitch < -80.0f) pitch = -80.0f;
-
-                cam_front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-                cam_front.y = sin(glm::radians(pitch));
-                cam_front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-                cam_front = glm::normalize(cam_front);
-
-            } else {
-
-                wnd->toggleCursorVisibility(true);
-                
-            }
-
-            if (wnd->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) speed = 15.0f;
-            else speed = 8.0f;
-
-            if (wnd->isKeyPressed(GLFW_KEY_W))          cam_pos += cam_front * speed * delta;   
-            if (wnd->isKeyPressed(GLFW_KEY_S))          cam_pos -= cam_front * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_A))          cam_pos -= glm::normalize(glm::cross(cam_front, cam_up)) * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_D))          cam_pos += glm::normalize(glm::cross(cam_front, cam_up)) * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_SPACE))      cam_pos += cam_up * speed * delta;
-            if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) cam_pos -= cam_up * speed * delta;
-        }
+        if (wnd->isKeyPressed(GLFW_KEY_W))          G_world.camera.moveForward(delta);
+        if (wnd->isKeyPressed(GLFW_KEY_S))          G_world.camera.moveBackward(delta);
+        if (wnd->isKeyPressed(GLFW_KEY_A))          G_world.camera.moveLeft(delta);
+        if (wnd->isKeyPressed(GLFW_KEY_D))          G_world.camera.moveRight(delta);
+        if (wnd->isKeyPressed(GLFW_KEY_SPACE))      G_world.camera.moveUp(delta);
+        if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) G_world.camera.moveDown(delta);
 
         wnd->clear(0x000000FF);
-        rnd->updateSSBO(wrld.getSpheres());
-        rnd->draw(w, h, cam_pos, cam_front, cam_up, wrld.getLightDirection());
+        rnd->updateSSBO(G_world.getSpheres());
+        rnd->draw(w, h,
+                  G_world.camera.getCameraPos(),
+                  G_world.camera.getCameraFront(),
+                  G_world.camera.getCameraUp(),
+                  G_world.getLightDirection()
+             );
         wnd->swapBuffers();
 
         wnd->pollEvents();
