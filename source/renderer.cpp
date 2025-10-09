@@ -40,13 +40,16 @@ void Renderer::updateSSBO(std::vector<Sphere> spheres) {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_SSBO);
 }
 
-void Renderer::draw(int wnd_w, int wnd_h, glm::vec3 cam_pos, glm::vec3 cam_front, glm::vec3 cam_up) {
+void Renderer::draw(int wnd_w, int wnd_h, glm::vec3 cam_pos,
+                    glm::vec3 cam_front, glm::vec3 cam_up, glm::vec3 light_dir) {
 
     m_computeShader->bind();
     m_computeShader->setUniform("resolution", glm::ivec2(wnd_w, wnd_h));
     m_computeShader->setUniform("cam_pos",   cam_pos);
     m_computeShader->setUniform("cam_front", cam_front);
     m_computeShader->setUniform("cam_up",    cam_up);
+
+    m_computeShader->setUniform("light_dir", light_dir);
 
     glDispatchCompute((GLuint)((wnd_w + 15) / 16), (GLuint)((wnd_h + 15) / 16), 1);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

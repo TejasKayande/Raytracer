@@ -6,19 +6,12 @@
 #include "window.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "world.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <vector>
-
-// NOTE(Tejas): this will be moved to the simulation part later
-struct Sphere {
-    glm::vec3 center;
-    float     radius;
-    glm::vec3 color;
-    float     _padding;
-};
 
 class Renderer {
 
@@ -33,9 +26,10 @@ class Renderer {
 
     // TODO(Tejas): create a camera abstraction here
     void draw(int wnd_w, int wnd_h,
-                        glm::vec3 cam_pos,
-                        glm::vec3 cam_front,
-                        glm::vec3 cam_up);
+              glm::vec3 cam_pos,
+              glm::vec3 cam_front,
+              glm::vec3 cam_up,
+              glm::vec3 light_dir);
 
  private:
 

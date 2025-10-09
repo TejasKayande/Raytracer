@@ -10,9 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 
-// TODO(Tejas): Do I want to store them in std::vector?? I dont know...
-//              Maybe create a world or scene abstraction!
-global std::vector<Sphere> G_spheres;
+World wrld;
 
 internal float randRange(float min, float max) {
 
@@ -28,7 +26,6 @@ internal bool tooClose(const Sphere& a, const Sphere& b, float min_distance) {
 internal void createSpheres() {
     
     std::srand(static_cast<unsigned>(std::time(nullptr)));
-    G_spheres.reserve(20);
 
     const float world_min = -100.0f;
     const float world_max =  100.0f;
@@ -51,15 +48,19 @@ internal void createSpheres() {
                                  randRange(world_min, world_max),
                                  randRange(world_min, world_max));
             placed = true;
-            for (const auto& other : G_spheres) {
+            for (const auto& other : wrld.getSpheres()) {
                 if (tooClose(s, other, min_spacing)) {
                     placed = false;
                     break;
                 }
             }
+
+            if (placed) {
+                wrld.addSphere(s.center, s.radius, s.color);
+            }
         }
 
-        G_spheres.push_back(s);
+        // wrld.addSphere(s);
     }
 }
 
@@ -69,6 +70,7 @@ int main(void) {
     Renderer *rnd = new Renderer(wnd->getWidth(), wnd->getHeight());
 
     createSpheres();
+    wrld.updateLightDirection(glm::vec3(0.0f, 1.0f, 1.0f));
 
     // TODO(Tejas): Abstract this away...
     glm::vec3 cam_pos   = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -157,8 +159,8 @@ int main(void) {
         }
 
         wnd->clear(0x000000FF);
-        rnd->updateSSBO(G_spheres);
-        rnd->draw(w, h, cam_pos, cam_front, cam_up);
+        rnd->updateSSBO(wrld.getSpheres());
+        rnd->draw(w, h, cam_pos, cam_front, cam_up, wrld.getLightDirection());
         wnd->swapBuffers();
 
         wnd->pollEvents();

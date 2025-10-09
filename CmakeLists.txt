@@ -47,6 +47,7 @@ add_executable(Raytracer
   source/shader.cpp
   source/texture.cpp
   source/renderer.cpp
+  source/world.cpp
 )
 
 target_compile_definitions(Raytracer PRIVATE GLEW_STATIC)

@@ -9,6 +9,8 @@ uniform vec3  cam_pos;
 uniform vec3  cam_front;
 uniform vec3  cam_up;
 
+uniform vec3 light_dir = vec3(1.0, 1.0, 1.0);
+
 struct Sphere {
     vec3  center;
     float radius;
@@ -49,35 +51,34 @@ void main() {
     uv = uv * 2.0 - 1.0;
     uv.x *= float(resolution.x) / float(resolution.y);
 
-    vec3 forward = normalize(cam_front);
-    vec3 right   = normalize(cross(forward, cam_up));
-    vec3 up      = cross(right, forward);
-    vec3 rayDir  = normalize(forward + uv.x * right + uv.y * up);
-    vec3 rayOrigin = cam_pos;
+    vec3 forward  = normalize(cam_front);
+    vec3 right    = normalize(cross(forward, cam_up));
+    vec3 up       = cross(right, forward);
+    vec3 ray_dir  = normalize(forward + uv.x * right + uv.y * up);
+    vec3 ray_ori  = cam_pos;
 
-    vec3  color     = vec3(0.0);
-    float closestT  = 1e20;
-    vec3  hitNormal = vec3(0.0);
-    vec3  hitColor  = vec3(0.0);
+    vec3  color      = vec3(0.0);
+    float closest_t  = 1e20;
+    vec3  hit_normal = vec3(0.0);
+    vec3  hit_color  = vec3(0.0);
 
     for (int i = 0; i < spheres.length(); ++i) {
 
         float t;
         vec3 normal;
-        if (intersectSphere(rayOrigin, rayDir, spheres[i], t, normal)) {
-            if (t < closestT) { closestT = t; hitNormal = normal; hitColor = spheres[i].color; }
+        if (intersectSphere(ray_ori, ray_dir, spheres[i], t, normal)) {
+            if (t < closest_t) { closest_t = t; hit_normal = normal; hit_color = spheres[i].color; }
         }
     }
 
-    if (closestT < 1e20) {
+    if (closest_t < 1e20) {
 
-        vec3  hitPos   = rayOrigin + rayDir * closestT;
-        vec3  lightDir = normalize(vec3(1.0,1.0,1.0));
-        float diffuse  = max(dot(hitNormal, lightDir), 0.0);
+        vec3  hit_pos = ray_ori + ray_dir * closest_t;
+        float diffuse = max(dot(hit_normal, normalize(light_dir)), 0.0);
 
-        vec3  ambient = 0.15 * hitColor;
-        vec3  diff    = diffuse * hitColor;
-        float rim     = pow(1.0 - max(0.0, dot(normalize(cam_pos - hitPos), hitNormal)), 2.0);
+        vec3  ambient = 0.15 * hit_color;
+        vec3  diff    = diffuse * hit_color;
+        float rim     = pow(1.0 - max(0.0, dot(normalize(cam_pos - hit_pos), hit_normal)), 2.0);
 
         color         = ambient + diff + 0.05 * rim;
 
