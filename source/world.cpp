@@ -41,3 +41,8 @@ glm::vec3 World::getLightDirection() const {
 
     return m_lightDirection;
 }
+
+std::vector<Sphere>& World::getSpheresRef() {
+
+    return m_spheres;
+}

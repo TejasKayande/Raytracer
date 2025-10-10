@@ -30,8 +30,12 @@ public:
     void addSphere(glm::vec3 center, float radius, glm::vec3 color);
     void addSphere(Sphere sp);
 
-    std::vector<Sphere> getSpheres() const;
+    std::vector<Sphere>  getSpheres() const;
     glm::vec3 getLightDirection() const;
+
+    // NOTE(Tejas): Not sure if this is a good practice!!
+    std::vector<Sphere>& getSpheresRef();
+
 
 public:
     

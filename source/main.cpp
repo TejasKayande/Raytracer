@@ -27,11 +27,12 @@ internal void createSpheres() {
     
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    const float world_min = -100.0f;
-    const float world_max =  100.0f;
+    const float world_min = -30.0f;
+    const float world_max =  30.0f;
     const float min_spacing = 8.0f;
-
-    for (int i = 0; i < 600; ++i) {
+    
+#if 0
+    for (int i = 0; i < 20; ++i) {
 
         Sphere s;
         bool placed = false;
@@ -59,9 +60,21 @@ internal void createSpheres() {
                 G_world.addSphere(s.center, s.radius, s.color);
             }
         }
-
-        // G_world.addSphere(s);
     }
+#else
+    for (int i = 0; i < 20; i++) {
+        
+        Sphere s;
+        s.radius = 1.3f;
+        s.color  = glm::vec3(randRange(0.0f, 1.0f),
+                             randRange(0.0f, 1.0f),
+                             randRange(0.0f, 1.0f));
+        s.center = glm::vec3((float)i * 3.0f, 0.0f, 0.0f);
+        s._padding = 0.0f;
+        G_world.addSphere(s);
+    }
+#endif
+
 }
 
 int main(void) {
@@ -115,7 +128,49 @@ int main(void) {
         if (wnd->isKeyPressed(GLFW_KEY_SPACE))      G_world.camera.moveUp(delta);
         if (wnd->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) G_world.camera.moveDown(delta);
 
+        if (wnd->isKeyPressed(GLFW_KEY_UP)) {
+            glm::vec3 light_dir = G_world.getLightDirection();
+            light_dir.y++;
+            G_world.updateLightDirection(light_dir);
+        }
+        if (wnd->isKeyPressed(GLFW_KEY_DOWN)) {
+            glm::vec3 light_dir = G_world.getLightDirection();
+            light_dir.y--;
+            G_world.updateLightDirection(light_dir);
+        }
+        if (wnd->isKeyPressed(GLFW_KEY_LEFT)) {
+            glm::vec3 light_dir = G_world.getLightDirection();
+            light_dir.x--;
+            G_world.updateLightDirection(light_dir);
+        }
+        if (wnd->isKeyPressed(GLFW_KEY_RIGHT)) {
+            glm::vec3 light_dir = G_world.getLightDirection();
+            light_dir.x++;
+            G_world.updateLightDirection(light_dir);
+        }
+
         wnd->clear(0x000000FF);
+
+
+        persist float accum = 0.0f;
+        accum += delta * 2.0f;
+
+        int index = 0;
+        for (Sphere& sp : G_world.getSpheresRef()) {
+
+            float phase = index * 0.3f;
+            float ampli = 1.0f;
+            float base  = 0.5f;
+
+            sp.color.r = base + ampli * sinf(accum + phase);
+            sp.color.g = base + ampli * sinf(accum + phase + 2.0f);
+            sp.color.b = base + ampli * sinf(accum + phase + 4.0f);
+
+            sp.center.y = base + ampli * sinf(accum + phase + 4.0f);
+
+            index++;
+        }
+
         rnd->updateSSBO(G_world.getSpheres());
         rnd->draw(w, h,
                   G_world.camera.getCameraPos(),
