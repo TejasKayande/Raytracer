@@ -30,9 +30,10 @@ internal void createSpheres() {
     const float world_min = -30.0f;
     const float world_max =  30.0f;
     const float min_spacing = 8.0f;
-    
-#if 0
-    for (int i = 0; i < 20; ++i) {
+
+    const int number_of_spheres = 10;
+#if 1
+    for (int i = 0; i < number_of_spheres; ++i) {
 
         Sphere s;
         bool placed = false;
@@ -62,7 +63,7 @@ internal void createSpheres() {
         }
     }
 #else
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < number_of_spheres; i++) {
         
         Sphere s;
         s.radius = 1.3f;
@@ -119,6 +120,17 @@ int main(void) {
         if (wnd->isMouseButtonPressed(0)) wnd->toggleCursorVisibility(false);
         else                              wnd->toggleCursorVisibility(true);
 
+        if (wnd->isKeyPressed(GLFW_KEY_F)) {
+            Sphere s;
+            s.radius = randRange(6.0f, 20.0f);
+            s.color  = glm::vec3(randRange(0.0f, 1.0f),
+                                 randRange(0.0f, 1.0f),
+                                 randRange(0.0f, 1.0f));
+            s.center = G_world.camera.getCameraPos();
+            s._padding = 0.0f;
+            G_world.addSphere(s);
+        }
+
         G_world.camera.updateMouse(mouse_x, mouse_y, !wnd->isCursorVisible());
 
         if (wnd->isKeyPressed(GLFW_KEY_W))          G_world.camera.moveForward(delta);
@@ -151,24 +163,30 @@ int main(void) {
 
         wnd->clear(0x000000FF);
 
+        float gravity  = 100.0f;
 
-        persist float accum = 0.0f;
-        accum += delta * 2.0f;
+        auto& spheres = G_world.getSpheresRef();
 
-        int index = 0;
-        for (Sphere& sp : G_world.getSpheresRef()) {
+        size_t n = spheres.size();
+        for (int i = 0; i < n; ++i) {
+            glm::vec3 total_force = glm::vec3(0.0f);
 
-            float phase = index * 0.3f;
-            float ampli = 1.0f;
-            float base  = 0.5f;
+            for (int j = 0; j < n; ++j) {
+                if (i == j) continue;
 
-            sp.color.r = base + ampli * sinf(accum + phase);
-            sp.color.g = base + ampli * sinf(accum + phase + 2.0f);
-            sp.color.b = base + ampli * sinf(accum + phase + 4.0f);
+                glm::vec3 dir = spheres[j].center - spheres[i].center;
+                float dist_sq = glm::dot(dir, dir);
+                if (dist_sq < 0.01f) continue;
 
-            sp.center.y = base + ampli * sinf(accum + phase + 4.0f);
+                float inv_dist = 1.0f / sqrtf(dist_sq);
+                dir *= inv_dist;
 
-            index++;
+                float force_mag = gravity / dist_sq;
+
+                total_force += dir * force_mag;
+            }
+
+            spheres[i].center += total_force * delta;
         }
 
         rnd->updateSSBO(G_world.getSpheres());
