@@ -49,6 +49,8 @@ add_executable(Raytracer
   source/renderer.cpp
   source/world.cpp
   source/camera.cpp
+
+  dependencies/stb/stb_image.cpp
 )
 
 target_compile_definitions(Raytracer PRIVATE GLEW_STATIC)
@@ -63,6 +65,7 @@ target_include_directories(Raytracer PRIVATE
     ${DEPS_DIR}/glfw/include
     ${DEPS_DIR}/glew/include
     ${DEPS_DIR}/glm
+    ${DEPS_DIR}/stb
 )
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Raytracer)

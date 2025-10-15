@@ -93,3 +93,18 @@ glm::vec3 Camera::getCameraUp() const {
     
     return m_camUp;
 }
+
+void Camera::setSprinting(bool val) {
+
+    m_sprinting = val;
+    if (m_sprinting) {
+        m_speed = 20.0f;
+    } else {
+        m_speed = 8.0f;
+    }
+}
+
+bool Camera::isSprinting() const {
+
+    return m_sprinting;
+}

@@ -27,11 +27,11 @@ internal void createSpheres() {
     
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    const float world_min = -30.0f;
-    const float world_max =  30.0f;
+    const float world_min = -300.0f;
+    const float world_max =  300.0f;
     const float min_spacing = 8.0f;
 
-    const int number_of_spheres = 10;
+    const int number_of_spheres = 200;
 #if 1
     for (int i = 0; i < number_of_spheres; ++i) {
 
@@ -132,6 +132,9 @@ int main(void) {
         }
 
         G_world.camera.updateMouse(mouse_x, mouse_y, !wnd->isCursorVisible());
+
+        if (wnd->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) G_world.camera.setSprinting(true);
+        else G_world.camera.setSprinting(false);
 
         if (wnd->isKeyPressed(GLFW_KEY_W))          G_world.camera.moveForward(delta);
         if (wnd->isKeyPressed(GLFW_KEY_S))          G_world.camera.moveBackward(delta);

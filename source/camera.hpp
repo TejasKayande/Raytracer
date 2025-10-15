@@ -32,6 +32,9 @@ public:
     glm::vec3 getCameraFront() const;
     glm::vec3 getCameraUp() const;
 
+    void setSprinting(bool val);
+    bool isSprinting() const;
+
 private:
     
     float m_yaw;
