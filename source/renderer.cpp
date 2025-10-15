@@ -10,6 +10,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// NOTE(Tejas): This is for the SSBO
+struct _Sphere {
+    glm::vec3 center;
+    float     radius;
+    glm::vec3 color;
+    float     _padding;
+};
+
 Renderer::Renderer(int wnd_w, int wnd_h) {
 
     m_quadShader    = new Shader("../assets/shaders/vert.glsl", "../assets/shaders/frag.glsl");
@@ -31,9 +39,21 @@ Renderer::~Renderer() {
 }
 
 void Renderer::updateSSBO(std::vector<Sphere> spheres) {
+
+    std::vector<_Sphere> sps;
+    for (Sphere sp : spheres) {
+        _Sphere s;
+        s.center = sp.center;
+        s.radius = sp.radius;
+        s.color  = sp.color;
+
+        s._padding = 0.0f;
+
+        sps.push_back(s);
+    }
     
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_SSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, spheres.size() * sizeof(Sphere), spheres.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sps.size() * sizeof(_Sphere), sps.data(), GL_DYNAMIC_DRAW);
 
     // NOTE(Tejas): hard coding value here may be okay as there is only going to
     //              be one object of this class.

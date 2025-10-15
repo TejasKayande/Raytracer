@@ -10,7 +10,6 @@ struct Sphere {
     glm::vec3 center;
     float     radius;
     glm::vec3 color;
-    float     _padding;
 };
 
 // TODO(Tejas): Camera Object will be created in this class

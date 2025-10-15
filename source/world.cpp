@@ -22,7 +22,6 @@ void World::addSphere(glm::vec3 center, float radius, glm::vec3 color) {
     s.center = center;
     s.radius = radius;
     s.color  = color;
-    s._padding = 0.0f;
 
     m_spheres.push_back(s);
 }

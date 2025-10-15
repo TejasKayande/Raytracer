@@ -31,7 +31,7 @@ internal void createSpheres() {
     const float world_max =  300.0f;
     const float min_spacing = 8.0f;
 
-    const int number_of_spheres = 200;
+    const int number_of_spheres = 100;
 #if 1
     for (int i = 0; i < number_of_spheres; ++i) {
 
@@ -42,7 +42,6 @@ internal void createSpheres() {
         s.color  = glm::vec3(randRange(0.0f, 1.0f),
                              randRange(0.0f, 1.0f),
                              randRange(0.0f, 1.0f));
-        s._padding = 0.0f;
 
         while (!placed) {
 
@@ -71,11 +70,39 @@ internal void createSpheres() {
                              randRange(0.0f, 1.0f),
                              randRange(0.0f, 1.0f));
         s.center = glm::vec3((float)i * 3.0f, 0.0f, 0.0f);
-        s._padding = 0.0f;
         G_world.addSphere(s);
     }
 #endif
 
+}
+
+internal void updateGravity(float delta) {
+    
+    float gravity  = 100.0f;
+    auto& spheres = G_world.getSpheresRef();
+    size_t n = spheres.size();
+
+    for (int i = 0; i < n; ++i) {
+
+        glm::vec3 total_force = glm::vec3(0.0f);
+
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+
+            glm::vec3 dir = spheres[j].center - spheres[i].center;
+            float dist_sq = glm::dot(dir, dir);
+            if (dist_sq < 0.01f) continue;
+
+            float inv_dist = 1.0f / sqrtf(dist_sq);
+            dir *= inv_dist;
+
+            float force_mag = gravity / dist_sq;
+
+            total_force += dir * force_mag;
+        }
+
+        spheres[i].center += total_force * delta;
+    }
 }
 
 int main(void) {
@@ -122,12 +149,11 @@ int main(void) {
 
         if (wnd->isKeyPressed(GLFW_KEY_F)) {
             Sphere s;
-            s.radius = randRange(6.0f, 20.0f);
+            s.radius = randRange(3.0f, 5.0f);
             s.color  = glm::vec3(randRange(0.0f, 1.0f),
                                  randRange(0.0f, 1.0f),
                                  randRange(0.0f, 1.0f));
             s.center = G_world.camera.getCameraPos();
-            s._padding = 0.0f;
             G_world.addSphere(s);
         }
 
@@ -166,31 +192,7 @@ int main(void) {
 
         wnd->clear(0x000000FF);
 
-        float gravity  = 100.0f;
-
-        auto& spheres = G_world.getSpheresRef();
-
-        size_t n = spheres.size();
-        for (int i = 0; i < n; ++i) {
-            glm::vec3 total_force = glm::vec3(0.0f);
-
-            for (int j = 0; j < n; ++j) {
-                if (i == j) continue;
-
-                glm::vec3 dir = spheres[j].center - spheres[i].center;
-                float dist_sq = glm::dot(dir, dir);
-                if (dist_sq < 0.01f) continue;
-
-                float inv_dist = 1.0f / sqrtf(dist_sq);
-                dir *= inv_dist;
-
-                float force_mag = gravity / dist_sq;
-
-                total_force += dir * force_mag;
-            }
-
-            spheres[i].center += total_force * delta;
-        }
+        updateGravity(delta);
 
         rnd->updateSSBO(G_world.getSpheres());
         rnd->draw(w, h,
