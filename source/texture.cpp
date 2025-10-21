@@ -2,6 +2,8 @@
 #include "texture.hpp"
 #include "base.hpp"
 
+#include "stb_image.h"
+
 #include <GL/glew.h>
 
 Texture::Texture(int width, int height)
@@ -21,6 +23,42 @@ Texture::Texture(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glBindTexture(GL_TEXTURE_2D, 0);   
+}
+
+// TODO(Tejas): This is HDR specific. Maybe pass a bool from the parameter, or a enum.
+Texture::Texture(const char* file_path) {
+    
+    // stbi_set_flip_vertically_on_load(false);
+
+    int chnls;
+
+    float* bytes = stbi_loadf(file_path, &m_width, &m_height, &chnls, 0);
+
+    if (!bytes) {
+        std::cerr << "coeldnt load " << "\'" << file_path<< "\'\n";
+        std::cerr << stbi_failure_reason() << "\n";
+        return;
+    }
+
+    m_internalFormat = GL_RGB16F;
+    m_format = GL_RGB;
+    m_type = GL_FLOAT;
+
+    
+    glGenTextures(1, &m_textureID);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, m_internalFormat,
+                 m_width, m_height, 0,
+                 m_format, m_type, bytes);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    stbi_image_free(bytes);
 }
 
 Texture::~Texture() {
@@ -58,16 +96,23 @@ Texture& Texture::operator=(Texture&& other) {
     return *this;
 }
 
-void Texture::bind(int unit) const {
+void Texture::bindImage(int unit) const {
 
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, m_textureID);
-    glBindImageTexture(0, m_textureID, 0, m_type, 0, GL_WRITE_ONLY, m_internalFormat);
+    glBindImageTexture(unit, m_textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, m_internalFormat);
+}
+
+void Texture::bindSampler(int unit) const {
+    
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, m_textureID);
 }
 
 void Texture::unbind(int unit) const {
 
-    glBindTexture(GL_TEXTURE_2D, 0 + unit);
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 GLuint Texture::getID() const {

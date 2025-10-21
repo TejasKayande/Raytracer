@@ -13,7 +13,10 @@ class Texture {
 
 public:
 
+    Texture() = default;
+
     Texture(int width, int height);
+    Texture(const char* file_path);
     ~Texture();
 
     Texture(const Texture&)            = delete;
@@ -22,8 +25,9 @@ public:
     Texture(Texture&& other);
     Texture& operator=(Texture&& other);
 
-    void bind(int unit=0) const;
-    void unbind(int unit=0) const;
+    void bindImage(int unit) const;
+    void bindSampler(int unit) const;
+    void unbind(int unit) const;
 
     GLuint getID() const;
     int getWidth() const;

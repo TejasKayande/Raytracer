@@ -23,11 +23,17 @@ Renderer::Renderer(int wnd_w, int wnd_h) {
     m_quadShader    = new Shader("../assets/shaders/vert.glsl", "../assets/shaders/frag.glsl");
     m_computeShader = new Shader("../assets/shaders/compute.glsl");
 
-    m_outTexture = new Texture(wnd_w, wnd_h);
+    m_outTexture    = new Texture(wnd_w, wnd_h);
+    // m_skyBoxTexture = new Texture("../assets/textures/skybox1.hdr");
+    m_skyBoxTexture = new Texture("../assets/textures/skybox2.hdr");
     m_initQuad();
+
 }
 
 Renderer::~Renderer() {
+
+    delete m_skyBoxTexture;
+    delete m_outTexture;
 
     delete m_quadShader;
     delete m_computeShader;
@@ -61,21 +67,27 @@ void Renderer::updateSSBO(std::vector<Sphere> spheres) {
 }
 
 void Renderer::draw(int wnd_w, int wnd_h, glm::vec3 cam_pos,
-                    glm::vec3 cam_front, glm::vec3 cam_up, glm::vec3 light_dir) {
+                    glm::vec3 cam_front, glm::vec3 cam_up, float cam_fov,
+                    glm::vec3 light_dir) {
 
     m_computeShader->bind();
     m_computeShader->setUniform("resolution", glm::ivec2(wnd_w, wnd_h));
     m_computeShader->setUniform("cam_pos",   cam_pos);
     m_computeShader->setUniform("cam_front", cam_front);
     m_computeShader->setUniform("cam_up",    cam_up);
-
+    m_computeShader->setUniform("cam_fov",    cam_fov);
     m_computeShader->setUniform("light_dir", light_dir);
+
+    m_outTexture->bindImage(0);
+
+    m_skyBoxTexture->bindSampler(2);
+    m_computeShader->setUniform("skybox", 2);
 
     glDispatchCompute((GLuint)((wnd_w + 15) / 16), (GLuint)((wnd_h + 15) / 16), 1);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
     m_quadShader->bind();
-    m_outTexture->bind();
+    m_outTexture->bindImage(0);
     m_quadShader->setUniform("screenTex", 0);
 
     glBindVertexArray(m_VAO);

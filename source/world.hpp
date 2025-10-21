@@ -12,7 +12,6 @@ struct Sphere {
     glm::vec3 color;
 };
 
-// TODO(Tejas): Camera Object will be created in this class
 class World {
     
 public:

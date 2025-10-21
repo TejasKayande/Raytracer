@@ -11,6 +11,7 @@ Camera::Camera() {
     m_yaw         = -90.0f;
     m_pitch       = 0.0f;
     m_speed       = 8.0f;
+    m_fov         = 80.0f;
     m_sensitivity = 0.1f;
 
     m_camPos   = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -18,6 +19,7 @@ Camera::Camera() {
     m_camUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
     m_sprinting = false;
+    m_zoomed    = false;
 }
 
 Camera::~Camera() { }
@@ -94,17 +96,33 @@ glm::vec3 Camera::getCameraUp() const {
     return m_camUp;
 }
 
-void Camera::setSprinting(bool val) {
+float Camera::getCameraFOV() const {
 
-    m_sprinting = val;
-    if (m_sprinting) {
-        m_speed = 20.0f;
-    } else {
-        m_speed = 8.0f;
-    }
+    return m_fov;
 }
 
 bool Camera::isSprinting() const {
 
     return m_sprinting;
+}
+
+void Camera::setSprinting(bool val) {
+
+    m_sprinting = val;
+
+    if (m_sprinting) m_speed = 20.0f;
+    else             m_speed = 8.0f;
+}
+
+bool Camera::isZoomed() const {
+
+    return m_zoomed;
+}
+
+void Camera::setZoomed(bool val) {
+
+    m_zoomed = val;
+
+    if (m_zoomed) m_fov = 30.0f;
+    else          m_fov = 90.0f;
 }

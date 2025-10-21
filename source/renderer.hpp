@@ -29,6 +29,7 @@ class Renderer {
               glm::vec3 cam_pos,
               glm::vec3 cam_front,
               glm::vec3 cam_up,
+              float     cam_fov,
               glm::vec3 light_dir);
 
  private:
@@ -36,7 +37,7 @@ class Renderer {
     GLuint m_VAO, m_VBO, m_EBO, m_SSBO;
 
     Shader *m_quadShader, *m_computeShader;
-    Texture *m_outTexture;
+    Texture *m_outTexture, *m_skyBoxTexture;
 
  private:
 

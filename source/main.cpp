@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 
-World G_world;
+internal World G_world;
 
 internal float randRange(float min, float max) {
 
@@ -162,6 +162,9 @@ int main(void) {
         if (wnd->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) G_world.camera.setSprinting(true);
         else G_world.camera.setSprinting(false);
 
+        if (wnd->isKeyPressed(GLFW_KEY_C)) G_world.camera.setZoomed(true);
+        else G_world.camera.setZoomed(false);
+
         if (wnd->isKeyPressed(GLFW_KEY_W))          G_world.camera.moveForward(delta);
         if (wnd->isKeyPressed(GLFW_KEY_S))          G_world.camera.moveBackward(delta);
         if (wnd->isKeyPressed(GLFW_KEY_A))          G_world.camera.moveLeft(delta);
@@ -192,13 +195,14 @@ int main(void) {
 
         wnd->clear(0x000000FF);
 
-        updateGravity(delta);
+        // updateGravity(delta);
 
         rnd->updateSSBO(G_world.getSpheres());
         rnd->draw(w, h,
                   G_world.camera.getCameraPos(),
                   G_world.camera.getCameraFront(),
                   G_world.camera.getCameraUp(),
+                  G_world.camera.getCameraFOV(),
                   G_world.getLightDirection()
              );
         wnd->swapBuffers();

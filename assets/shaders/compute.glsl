@@ -3,13 +3,17 @@
 layout(local_size_x = 16, local_size_y = 16) in;
 
 layout(rgba32f, binding = 0) writeonly uniform image2D out_image;
+layout(binding = 2) uniform sampler2D skybox;
 
 uniform ivec2 resolution;
 uniform vec3  cam_pos;
 uniform vec3  cam_front;
 uniform vec3  cam_up;
+uniform float cam_fov;
 
 uniform vec3 light_dir = vec3(1.0, 1.0, 1.0);
+
+#define MATH_PI 3.14159265
 
 struct Sphere {
     vec3  center;
@@ -47,6 +51,8 @@ void main() {
     ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
     if (pixel.x >= resolution.x || pixel.y >= resolution.y) return;
 
+    float fov_scale = tan(radians(cam_fov) * 0.5);
+
     vec2 uv = (vec2(pixel) + 0.5) / vec2(resolution);
     uv = uv * 2.0 - 1.0;
     uv.x *= float(resolution.x) / float(resolution.y);
@@ -54,7 +60,8 @@ void main() {
     vec3 forward  = normalize(cam_front);
     vec3 right    = normalize(cross(forward, cam_up));
     vec3 up       = cross(right, forward);
-    vec3 ray_dir  = normalize(forward + uv.x * right + uv.y * up);
+    vec3 ray_dir = normalize(forward + uv.x * fov_scale * right + uv.y * fov_scale * up);
+    // vec3 ray_dir  = normalize(forward + uv.x * right + uv.y * up);
     vec3 ray_ori  = cam_pos;
 
     vec3  color      = vec3(0.0);
@@ -82,6 +89,9 @@ void main() {
 
         color         = ambient + diff + 0.05 * rim;
 
+    } else {
+        vec2 sky_uv = vec2(atan(ray_dir.z, ray_dir.x) / (2.0 * MATH_PI) + 0.5, asin(ray_dir.y) / MATH_PI + 0.5);
+        color       = texture(skybox, sky_uv).rgb;
     }
 
     imageStore(out_image, pixel, vec4(color, 1.0));

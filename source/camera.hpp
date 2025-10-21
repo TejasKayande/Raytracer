@@ -31,15 +31,20 @@ public:
     glm::vec3 getCameraPos() const;
     glm::vec3 getCameraFront() const;
     glm::vec3 getCameraUp() const;
+    float     getCameraFOV() const;
 
-    void setSprinting(bool val);
     bool isSprinting() const;
+    void setSprinting(bool val);
+
+    bool isZoomed() const;
+    void setZoomed(bool val);
 
 private:
     
     float m_yaw;
     float m_pitch;
     float m_speed;
+    float m_fov;
     float m_sensitivity;
 
     glm::vec3 m_camPos;
@@ -47,6 +52,7 @@ private:
     glm::vec3 m_camUp;
 
     bool m_sprinting;
+    bool m_zoomed;
 
     double m_lastMouseX;
     double m_lastMouseY;
